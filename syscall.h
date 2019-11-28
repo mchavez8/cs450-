@@ -20,3 +20,5 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+#define SYS_date   22 // added system call date for PA2
+#define SYS_mkSFdir 23 // implementing system call for creating small files 

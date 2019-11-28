@@ -31,7 +31,8 @@ struct dinode {
   short major;          // Major device number (T_DEV only)
   short minor;          // Minor device number (T_DEV only)
   short nlink;          // Number of links to inode in file system
-  uint size;            // Size of file (bytes)
+  uint size;            // Size of file (bytes) 
+  uint small_file;      // Size of small files (bytes) 
   uint addrs[NDIRECT+1];   // Data block addresses
 };
 
@@ -50,6 +51,11 @@ struct dinode {
 // Directory is a file containing a sequence of dirent structures.
 #define DIRSIZ 14
 
+
+// lets calculate the small file offset
+//unsigned int get_small_offset( unsigned int inum);
+
+ 
 struct dirent {
   ushort inum;
   char name[DIRSIZ];

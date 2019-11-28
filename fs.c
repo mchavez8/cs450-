@@ -27,6 +27,8 @@ static void itrunc(struct inode*);
 // only one device
 struct superblock sb; 
 
+
+ 
 // Read the super block.
 void
 readsb(int dev, struct superblock *sb)
@@ -35,6 +37,7 @@ readsb(int dev, struct superblock *sb)
 
   bp = bread(dev, 1);
   memmove(sb, bp->data, sizeof(*sb));
+  // we want to stroe data into the inode itself 
   brelse(bp);
 }
 
@@ -206,7 +209,12 @@ ialloc(uint dev, short type)
       dip->type = type;
       log_write(bp);   // mark it allocated on the disk
       brelse(bp);
-      return iget(dev, inum);
+     // return iget(dev, inum);
+	// now we want to allocate an indoe for small files 
+	struct inode *node = iget(dev,inum); // get the metadata that goes into an inode
+	node-> small_file = ( type == T_SMALL); // store that information into the inode if the file is a small size 
+	return node; // return the inode 
+
     }
     brelse(bp);
   }
@@ -230,6 +238,7 @@ iupdate(struct inode *ip)
   dip->minor = ip->minor;
   dip->nlink = ip->nlink;
   dip->size = ip->size;
+  dip->small_file= ip-> small_file; // modify for small files 
   memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
   log_write(bp);
   brelse(bp);
@@ -303,6 +312,7 @@ ilock(struct inode *ip)
     ip->minor = dip->minor;
     ip->nlink = dip->nlink;
     ip->size = dip->size;
+    ip->small_file = dip->small_file; // modify for small files 
     memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
     brelse(bp);
     ip->valid = 1;
@@ -374,6 +384,13 @@ bmap(struct inode *ip, uint bn)
 {
   uint addr, *a;
   struct buf *bp;
+
+// we are going to create an if statement to store data onto the inode itself for small files 
+
+if (ip->small_file ==1) // if the inode is the small file{
+{
+ 	return IBLOCK(ip->inum, sb); // simply return  the block of the number 
+}
 
   if(bn < NDIRECT){
     if((addr = ip->addrs[bn]) == 0)
@@ -454,12 +471,27 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 {
   uint tot, m;
   struct buf *bp;
+  int i;
 
   if(ip->type == T_DEV){
     if(ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
       return -1;
     return devsw[ip->major].read(ip, dst, n);
   }
+	
+if(ip-> type == T_SMALL) {
+	if (off > ip->size || off + n < off)
+		return -1; // checking the boundaries of the offset 
+	if(off + n > ip->size)
+		n = ip->size - off;
+	for (  i = off; i<off + n; i++){
+		memmove( dst + (i-off), ip->addrs + i%64, 1); // move the contents of the inode to the destination
+	}
+	off = off + n;
+	return n;
+}
+
+
 
   if(off > ip->size || off + n < off)
     return -1;
@@ -483,6 +515,7 @@ writei(struct inode *ip, char *src, uint off, uint n)
 {
   uint tot, m;
   struct buf *bp;
+  int i;
 
   if(ip->type == T_DEV){
     if(ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].write)
@@ -494,6 +527,20 @@ writei(struct inode *ip, char *src, uint off, uint n)
     return -1;
   if(off + n > MAXFILE*BSIZE)
     return -1;
+
+// now we are going to determine if the file is small, if its is, wrie data to inode,
+	if (ip->type == T_SMALL){
+	  if(off + n >64 || ip->size + n >64) // if it is not a small file
+		return -1; // return a negative value 
+	  for ( i = off; i < off + n; i++){
+		memmove(ip->addrs + i%64, src+(i-off),1); // move the contents of the inode to src
+	   }
+	off = off + n;
+	ip->size = off;
+	iupdate(ip);
+	return n;
+}
+		
 
   for(tot=0; tot<n; tot+=m, off+=m, src+=m){
     bp = bread(ip->dev, bmap(ip, off/BSIZE));

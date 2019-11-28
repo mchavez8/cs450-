@@ -103,6 +103,10 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_date(void); // adding system call date()
+extern int sys_mkSFdir(void); // adding a new system call
+//extern int sys_getsharedpage(void); // adding system call GetSharedPage()
+//extern int sys_freesharedpage(void); // adding system call FreeSharedPage()
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -126,6 +130,10 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_date]    sys_date, // adding system call date 
+[SYS_mkSFdir] sys_mkSFdir, // adding a system call to create small files 
+//[SYS_getsharedpage] sys_getsharedpage, // adding a new system call 
+//[SYS_freesharedpage] sys_freesharedpage, // adding a new system call 
 };
 
 void

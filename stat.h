@@ -1,7 +1,8 @@
 #define T_DIR  1   // Directory
 #define T_FILE 2   // File
 #define T_DEV  3   // Device
-
+#define T_SMALL 4 // new type of file we are going to create 
+#define T_SMALLDIR 5 // A NEW TYPE OF DIRECTORY 
 struct stat {
   short type;  // Type of file
   int dev;     // File system's disk device

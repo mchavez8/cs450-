@@ -1,6 +1,7 @@
 struct file {
   enum { FD_NONE, FD_PIPE, FD_INODE } type;
   int ref; // reference count
+  int small_file; // the file can now be a small file as well 
   char readable;
   char writable;
   struct pipe *pipe;
@@ -16,6 +17,7 @@ struct inode {
   int ref;            // Reference count
   struct sleeplock lock; // protects everything below here
   int valid;          // inode has been read from disk?
+  int small_file; // the copy of the inode now has a small_file 
 
   short type;         // copy of disk inode
   short major;

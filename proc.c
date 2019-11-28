@@ -532,3 +532,16 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+
+/*
+// this is where i guess i add code for date()
+// system call definition 
+void  
+date()
+{
+//	struct rtcdate *r; 
+	// i am assuming this is where we leverage cmostime()
+	return cmostime();
+}
+*/

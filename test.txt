@@ -1,0 +1,15 @@
+echo "A"
+
+echo A ; echo B
+
+echo A & echo B
+
+echo A ; echo B & echo C
+
+echo a;
+
+echo a&
+
+ls
+
+kfj; 

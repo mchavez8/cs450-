@@ -23,7 +23,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-
+int date(struct rtcdate *r); // adding date to this file, takes an argument r to take in the information from cmostime 
+int mkSFdir(const char*); // adding a new system call to make small files 
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);

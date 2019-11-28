@@ -120,7 +120,8 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-
+void            date(void); // adding the function prototype
+void            mkSFdir(void); 
 // swtch.S
 void            swtch(struct context**, struct context*);
 

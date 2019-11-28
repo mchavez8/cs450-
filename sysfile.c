@@ -253,6 +253,8 @@ create(char *path, short type, short major, short minor)
     ilock(ip);
     if(type == T_FILE && ip->type == T_FILE)
       return ip;
+    else if (type == T_SMALL && ip -> type == T_SMALL) // we want to create a small file 
+      return ip; // return the inode of the small file
     iunlockput(ip);
     return 0;
   }
@@ -294,6 +296,17 @@ sys_open(void)
     return -1;
 
   begin_op();
+ 
+  // now we are going to attempt and open up a new file called T_SMALL, a new small file 
+  if(omode & O_CREATE)
+   {
+   if (omode & T_SMALL)
+    {
+	// this section we are going to set up the inode for a small file no
+	ip = create(path, T_SMALL, 0,0);
+	return -1;
+     }
+ }
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0);
@@ -347,6 +360,37 @@ sys_mkdir(void)
   end_op();
   return 0;
 }
+
+// now we are going to attempt to write a method for mkSFdir
+int 
+sys_mkSFdir(void)
+{
+	char *path;
+	struct inode *ip;
+	//short type; // we want to indicate that 
+	begin_op();
+	if (T_SMALL && T_SMALLDIR){
+		if( argstr(0,&path) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0) {
+		end_op();
+		return -1;
+	} 
+
+}
+else 
+{
+		if( argstr(0,&path) < 0 || (ip = create(path, T_DIR, 0, 0)) == 0) 
+	{
+                	end_op();
+                	return -1;
+	}
+}
+
+iunlockput(ip);
+end_op();
+return 0;
+}
+
+
 
 int
 sys_mknod(void)
