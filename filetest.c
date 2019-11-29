@@ -29,4 +29,5 @@ main(void)
 
 	printf(1, " write succeeded\n");
 	close(fd); // close the file
+	exit();
 }
